@@ -18,7 +18,7 @@ import torch_geometric
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.nn.inits import zeros
-from torch_geometric.utils import index_sort, lexsort
+from torch_geometric.utils import index_sort #, lexsort
 from torch_geometric import EdgeIndex
 from torch_geometric.edge_index import SortOrder
 
