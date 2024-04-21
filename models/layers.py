@@ -500,7 +500,7 @@ class GINETaylorConv(MessagePassing):
 #         x += x_k / c
 #     return x
 
-
+"""
 class UnitaryGATConv(MessagePassing):
     def __init__(
         self,
@@ -624,7 +624,9 @@ class UnitaryGATConv(MessagePassing):
             Tuple[Tensor, Tuple[Tensor, Tensor]],
             Tuple[Tensor, SparseTensor],
     ]:
-        r"""Runs the forward pass of the module.
+        r"""
+"""
+        Runs the forward pass of the module.
 
         Args:
             x (torch.Tensor or (torch.Tensor, torch.Tensor)): The input node
@@ -639,6 +641,7 @@ class UnitaryGATConv(MessagePassing):
                 :obj:`(edge_index, attention_weights)`, holding the computed
                 attention weights for each edge. (default: :obj:`None`)
         """
+"""
         # NOTE: attention weights will be returned whenever
         # `return_attention_weights` is set to a value, regardless of its
         # actual value (might be `True` or `False`). This is a current somewhat
@@ -811,3 +814,5 @@ def sort_edge_index_order(  # noqa: F811
         _, perm = index_sort(idx, max_value=num_nodes * num_nodes)
 
     return perm
+
+"""
