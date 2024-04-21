@@ -13,7 +13,7 @@ from preprocessing import rewiring, sdrf, fosr, borf
 
 import torch_geometric.transforms as T
 from torch_geometric.transforms import Compose
-from custom_encodings import ShortestPathGenerator, OneHotEdgeAttr, LocalCurvatureProfile
+from custom_encodings import LocalCurvatureProfile
 
 
 default_args = AttrDict({
