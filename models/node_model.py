@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import ModuleList, Dropout, ReLU
 from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GINConv, FiLMConv, global_mean_pool
 
-from layers import TaylorGCNConv
+from models.layers import TaylorGCNConv
 
 class RGINConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
