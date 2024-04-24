@@ -88,12 +88,12 @@ class ComplexGCN(nn.Module):
         num_layers = 2
         hidden_layer_dim = 128
         self.T = 20
-        num_features = [input_dim] + [hidden_dim for i in range(num_layers)] + [output_dim]
+        self.num_features = [input_dim] + [hidden_dim for i in range(num_layers)] + [output_dim]
         # for _ in range(num_layers):
-        for i, (in_features, out_features) in enumerate(zip(num_features[:-1], num_features[1:])):
+        for i, (in_features, out_features) in enumerate(zip(self.num_features[:-1], self.num_features[1:])):
             sample_layer = ComplexGCNConv(in_features, out_features)
             taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
-            complex_layer = taylor_layer(nn.Sequential(nn.Linear(in_features, out_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features)))
+            complex_layer = taylor_layer()
             self.conv_layers.append(complex_layer)
             # self.conv_layers.append(taylor_layer)
             input_dim = hidden_dim
@@ -104,6 +104,9 @@ class ComplexGCN(nn.Module):
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
         for conv in self.conv_layers:
+            in_features = x.size(1)
+            out_features = self.hidden_layer.in_features
+            x = nn.Sequential(nn.Linear(in_features, out_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features))
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
