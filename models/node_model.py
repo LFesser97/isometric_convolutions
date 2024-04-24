@@ -106,7 +106,7 @@ class ComplexGCN(nn.Module):
         for conv in self.conv_layers:
             in_features = x.size(1)
             out_features = self.hidden_layer.in_features
-            lin_layer = nn.Sequential(nn.Linear(out_features, out_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features)).to(device)
+            lin_layer = nn.Sequential(nn.Linear(in_features, in_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features)).to(device)
             x = lin_layer(x.to(device))
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
