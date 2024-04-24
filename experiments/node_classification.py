@@ -10,7 +10,7 @@ from math import inf
 from models.node_model import GCN, ComplexGCN
 
 default_args = AttrDict(
-    {"learning_rate": 1e-3,
+    {"learning_rate": 0.0007, # 1e-3,
     "max_epochs": 1000000,
     "display": True,
     "device": None,
