@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import ModuleList, Dropout, ReLU
 from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GINConv, FiLMConv, global_mean_pool
 
-from models.layers import TaylorGCNConv
+from models.layers import TaylorGCNConv, ComplexGCNConv
 
 class RGINConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
@@ -41,6 +41,7 @@ class GCN(torch.nn.Module):
 
         self.dropout = Dropout(p=args.dropout)
         self.act_fn = ReLU()
+
     def get_layer(self, in_features, out_features):
         if self.layer_type == "GCN":
             return GCNConv(in_features, out_features)
@@ -56,6 +57,9 @@ class GCN(torch.nn.Module):
             return FiLMConv(in_features, out_features)
         elif self.layer_type == "Taylor":
             return TaylorGCNConv(in_features, out_features)
+        elif self.layer_type == "Complex":
+            return ComplexGCNConv(in_features, out_features)
+        
     def reset_parameters(self):
         for layer in self.layers:
             layer.reset_parameters()
