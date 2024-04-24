@@ -107,10 +107,8 @@ class ComplexGCN(nn.Module):
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
             x = torch.complex(x_real, x_imag)
-        x = global_mean_pool(x.real, data.batch)  # Global pooling over nodes
-        x = F.relu(self.hidden_layer(x))  # Hidden layer with ReLU activation
         x = self.output_layer(x)  # Output layer
-        return x.squeeze()
+        return x
     
     def reset_parameters(self):
         pass
