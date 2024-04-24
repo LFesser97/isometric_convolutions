@@ -6,7 +6,7 @@ from torch.utils.data import random_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from math import inf
 
-from models.graph_model import GNN
+from models.graph_model import GNN, ComplexGCN
 
 default_args = AttrDict(
     {"learning_rate": 1e-3,
@@ -59,7 +59,10 @@ class Experiment:
             else:
                 self.args.num_relations = 2
 
-        self.model = GNN(self.args).to(self.args.device)
+        if self.args.layer_type == "Complex":
+            self.model = ComplexGCN(self.args).to(self.args.device)
+        else:
+            self.model = GNN(self.args).to(self.args.device)
        
         if self.test_dataset is None:
             dataset_size = len(self.dataset)

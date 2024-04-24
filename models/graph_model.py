@@ -3,6 +3,8 @@ import torch.nn as nn
 from measure_smoothing import dirichlet_normalized
 from torch.nn import ModuleList, Dropout, ReLU
 from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GatedGraphConv, GINConv, FiLMConv, global_mean_pool, GATConv, SuperGATConv, global_max_pool
+import torch.nn.functional as F
+from models.layers import TaylorGCNConv, ComplexGCNConv
 
 class RGATConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
@@ -103,3 +105,39 @@ class GNN(torch.nn.Module):
             return energy
         x = global_mean_pool(x, batch)
         return x
+    
+
+class ComplexGCN(nn.Module):
+    def __init__(self, args):
+        super(ComplexGCN, self).__init__()
+        self.conv_layers = nn.ModuleList()
+        input_dim = args.input_dim
+        hidden_dim = 128
+        output_dim = args.output_dim
+        num_layers = 2
+        hidden_layer_dim = 128
+        self.T = 20
+        self.conv_layers = nn.ModuleList()
+        for _ in range(num_layers):
+            sample_layer = ComplexGCNConv(input_dim, hidden_dim)
+            taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
+            self.conv_layers.append(taylor_layer)
+            input_dim = hidden_dim
+        self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
+        self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
+        self.reset_parameters()
+
+    def forward(self, data):
+        x, edge_index = data.x, data.edge_index
+        for conv in self.conv_layers:
+            x = conv(x, edge_index)
+            x_real = F.relu(x.real)
+            x_imag = F.relu(x.imag)
+            x = torch.complex(x_real, x_imag)
+        x = global_mean_pool(x.real, data.batch)  # Global pooling over nodes
+        x = F.relu(self.hidden_layer(x))  # Hidden layer with ReLU activation
+        x = self.output_layer(x)  # Output layer
+        return x.squeeze()
+    
+    def reset_parameters(self):
+        pass
