@@ -86,10 +86,10 @@ class ComplexGCN(nn.Module):
         # self.num_layers = num_layers
         self.conv_layers = nn.ModuleList()
         input_dim = args.input_dim
-        hidden_dim = 128
+        hidden_dim = 512
         output_dim = args.output_dim
-        num_layers = args.hidden_layers
-        hidden_layer_dim = 128
+        num_layers = 3
+        hidden_layer_dim = 512
         T = 8
         for _ in range(num_layers):
             sample_layer = ComplexGCNConv(input_dim, hidden_dim)
