@@ -79,11 +79,8 @@ class GCN(torch.nn.Module):
 
 
 class ComplexGCN(nn.Module):
-    # def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, num_layers: int,
-        # hidden_layer_dim: int, T: int = 8):
     def __init__(self, args):
         super(ComplexGCN, self).__init__()
-        # self.num_layers = num_layers
         self.conv_layers = nn.ModuleList()
         input_dim = args.input_dim
         hidden_dim = 128
@@ -91,10 +88,14 @@ class ComplexGCN(nn.Module):
         num_layers = 2
         hidden_layer_dim = 128
         self.T = 20
-        for _ in range(num_layers):
-            sample_layer = ComplexGCNConv(input_dim, hidden_dim)
+        num_features = [input_dim] + [hidden_dim for i in range(num_layers)] + [output_dim]
+        # for _ in range(num_layers):
+        for i, (in_features, out_features) in enumerate(zip(num_features[:-1], num_features[1:])):
+            sample_layer = ComplexGCNConv(in_features, out_features)
             taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
-            self.conv_layers.append(taylor_layer)
+            complex_layer = taylor_layer(nn.Sequential(nn.Linear(in_features, out_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features)))
+            self.conv_layers.append(complex_layer)
+            # self.conv_layers.append(taylor_layer)
             input_dim = hidden_dim
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
@@ -107,7 +108,7 @@ class ComplexGCN(nn.Module):
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
             x = torch.complex(x_real, x_imag)
-        x = self.output_layer(x.real)  # Output layer
+        x = self.output_layer(x.real)
         return x
     
     def reset_parameters(self):
