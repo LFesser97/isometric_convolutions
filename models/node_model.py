@@ -107,8 +107,8 @@ class ComplexGCN(nn.Module):
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
             x = torch.complex(x_real, x_imag)
-        x = self.output_layer(x)  # Output layer
-        return x.real
+        x = self.output_layer(x.real)  # Output layer
+        return x
     
     def reset_parameters(self):
         pass
