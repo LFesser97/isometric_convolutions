@@ -6,6 +6,8 @@ import torch.nn.functional as F
 
 from models.layers import TaylorGCNConv, ComplexGCNConv
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 class RGINConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
         super(RGINConv, self).__init__()
@@ -105,7 +107,7 @@ class ComplexGCN(nn.Module):
             in_features = x.size(1)
             out_features = self.hidden_layer.in_features
             lin_layer = nn.Sequential(nn.Linear(in_features, out_features),nn.BatchNorm1d(out_features), nn.ReLU(),nn.Linear(out_features, out_features))
-            x = lin_layer(x)
+            x = lin_layer(x.to(device))
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
