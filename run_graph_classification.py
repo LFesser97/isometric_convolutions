@@ -30,7 +30,7 @@ enzymes = list(TUDataset(root="data", name="ENZYMES"))
 proteins = list(TUDataset(root="data", name="PROTEINS"))
 imdb = list(TUDataset(root="data", name="IMDB-BINARY"))
 
-datasets = {"mutag": mutag, "enzymes": enzymes, "proteins": proteins}
+datasets = {"mutag": mutag, "enzymes": enzymes, "proteins": proteins, "imdb": imdb}
 
 for key in datasets:
     if key in ["reddit", "imdb", "collab"]:
