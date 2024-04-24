@@ -79,21 +79,21 @@ class GCN(torch.nn.Module):
 
 
 class ComplexGCN(nn.Module):
-    def __init__(
-        self,
-        input_dim: int,
-        hidden_dim: int,
-        output_dim: int,
-        num_layers: int,
-        hidden_layer_dim: int,
-        T: int = 8
-    ):
+    # def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, num_layers: int,
+        # hidden_layer_dim: int, T: int = 8):
+    def __init__(self, args):
         super(ComplexGCN, self).__init__()
-        self.num_layers = num_layers
+        # self.num_layers = num_layers
         self.conv_layers = nn.ModuleList()
+        input_dim = args.input_dim
+        hidden_dim = 128
+        output_dim = args.output_dim
+        num_layers = args.hidden_layers
+        hidden_layer_dim = 128
+        T = 8
         for _ in range(num_layers):
             sample_layer = ComplexGCNConv(input_dim, hidden_dim)
-            taylor_layer = TaylorGCNConv(sample_layer, T=T)
+            taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
             self.conv_layers.append(taylor_layer)
             input_dim = hidden_dim
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
