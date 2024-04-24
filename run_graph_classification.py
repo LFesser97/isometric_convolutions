@@ -70,7 +70,7 @@ default_args = AttrDict({
     "display": True,
     "num_trials": 50,
     "eval_every": 1,
-    "rewiring": "borf",
+    "rewiring": None,
     "num_iterations": 3,
     "patience": 100,
     "output_dim": 2,
