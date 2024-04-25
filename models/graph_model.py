@@ -117,6 +117,7 @@ class ComplexGCN(nn.Module):
         num_layers = 4
         hidden_layer_dim = 128
         self.T = 20
+        self.dropout = Dropout(p=args.dropout)
         self.conv_layers = nn.ModuleList()
         for _ in range(num_layers):
             sample_layer = ComplexGCNConv(input_dim, hidden_dim)
@@ -132,7 +133,9 @@ class ComplexGCN(nn.Module):
         for conv in self.conv_layers:
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
+            x_real = self.dropout(x_real) # added dropout
             x_imag = F.relu(x.imag)
+            x_imag = self.dropout(x_imag) # added dropout
             x = torch.complex(x_real, x_imag)
         x = global_mean_pool(x.real, data.batch)  # Global pooling over nodes
         x = F.relu(self.hidden_layer(x))  # Hidden layer with ReLU activation
