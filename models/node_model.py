@@ -96,6 +96,7 @@ class ComplexGCN(nn.Module):
             input_dim = hidden_dim
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
+        self.gcn_layer = GCNConv(hidden_layer_dim, output_dim)
         self.reset_parameters()
 
     def forward(self, data):
@@ -105,7 +106,8 @@ class ComplexGCN(nn.Module):
             x_real = F.relu(x.real)
             x_imag = F.relu(x.imag)
             x = torch.complex(x_real, x_imag)
-        x = self.output_layer(x.real)
+        # x = self.output_layer(x.real)
+        x = self.gcn_layer(x.real, edge_index)
         return x
     
     def reset_parameters(self):
