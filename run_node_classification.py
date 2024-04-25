@@ -97,13 +97,13 @@ else:
     pubmed = Planetoid(root="data", name="pubmed")
     roman_empire = HeterophilousGraphDataset(root="data", name="Roman-empire")
     amazon_ratings = HeterophilousGraphDataset(root="data", name="Amazon-ratings")
-    # minesweeper = HeterophilousGraphDataset(root="data", name="Minesweeper", transform=largest_cc)
+    minesweeper = HeterophilousGraphDataset(root="data", name="Minesweeper")
     # tolokers = HeterophilousGraphDataset(root="data", name="Tolokers", transform=largest_cc)
     # questions = HeterophilousGraphDataset(root="data", name="Questions", transform=largest_cc)
 
 datasets = {"cornell": cornell, "wisconsin": wisconsin, "texas": texas, "chameleon": chameleon,
             "cora": cora, "citeseer": citeseer, "pubmed": pubmed, "roman_empire": roman_empire,
-            "amazon_ratings": amazon_ratings}
+            "amazon_ratings": amazon_ratings, "minesweeper": minesweeper}
 
 
 for key in datasets:
