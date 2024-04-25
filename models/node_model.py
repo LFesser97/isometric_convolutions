@@ -86,7 +86,7 @@ class ComplexGCN(nn.Module):
         input_dim = args.input_dim
         hidden_dim = 128
         output_dim = args.output_dim
-        num_layers = 2
+        num_layers = args.num_layers
         hidden_layer_dim = 128
         self.T = 100
         for _ in range(num_layers):
