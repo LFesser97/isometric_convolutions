@@ -33,8 +33,8 @@ default_args = AttrDict({
     "borf_batch_add" : 4,
     "borf_batch_remove" : 2,
     "sdrf_remove_edges" : False,
-    "encoding": None
-    "T" : 20,
+    "encoding": None,
+    "T" : 20
 })
 
 
