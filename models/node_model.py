@@ -94,7 +94,7 @@ class ComplexGCN(nn.Module):
             sample_layer = ComplexGCNConv(hidden_dim, hidden_dim)
             taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
             self.conv_layers.append(taylor_layer)
-            input_dim = hidden_dim
+            # input_dim = hidden_dim
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
         self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
