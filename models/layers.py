@@ -146,7 +146,7 @@ class ComplexGCNConv(MessagePassing):
         improved: bool = False,
         cached: bool = False,
         add_self_loops: Optional[bool] = False,
-        normalize: bool = False,
+        normalize: bool = True,
         bias: bool = True,
         **kwargs,
     ):
