@@ -89,6 +89,7 @@ class ComplexGCN(nn.Module):
         num_layers = args.num_layers
         hidden_layer_dim = hidden_dim
         self.T = args.T
+        self.dropout = Dropout(p=args.dropout)
         for _ in range(num_layers):
             # sample_layer = ComplexGCNConv(input_dim, hidden_dim)
             sample_layer = ComplexGCNConv(hidden_dim, hidden_dim)
