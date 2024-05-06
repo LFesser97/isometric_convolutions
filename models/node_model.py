@@ -107,7 +107,9 @@ class ComplexGCN(nn.Module):
         for conv in self.conv_layers:
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
+            x_real = self.dropout(x_real)
             x_imag = F.relu(x.imag)
+            x_imag = self.dropout(x_imag)
             x = torch.complex(x_real, x_imag)
         # x = self.output_layer(x.real)
         x = self.gcn_out_layer(x.real, edge_index)
