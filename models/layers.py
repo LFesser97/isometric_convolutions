@@ -147,7 +147,7 @@ class ComplexGCNConv(MessagePassing):
         cached: bool = False,
         add_self_loops: Optional[bool] = False,
         normalize: bool = True,
-        bias: bool = True,
+        bias: bool = False, # True,
         **kwargs,
     ):
         kwargs.setdefault('aggr', 'add')
