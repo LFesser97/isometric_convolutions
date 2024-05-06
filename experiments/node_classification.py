@@ -66,7 +66,7 @@ class Experiment:
         
     def run(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
-        scheduler = ReduceLROnPlateau(optimizer,  patience=25)
+        scheduler = ReduceLROnPlateau(optimizer,  patience=25, factor=0.1)
 
         if self.args.display:
             print("Starting training")
