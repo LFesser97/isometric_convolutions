@@ -29,7 +29,7 @@ default_args = AttrDict(
     "batch_size": 32,
     "layer_type": "GCN",
     "num_relations": 1,
-    "T": 20
+    "T": 100
     }
     )
 
