@@ -88,7 +88,7 @@ class ComplexGCN(nn.Module):
         self.hidden_dim = args.hidden_dim
         output_dim = args.output_dim
         num_layers = args.num_layers
-        hidden_layer_dim = hidden_dim
+        hidden_layer_dim = self.hidden_dim
         self.T = args.T
         self.dropout = Dropout(p=args.dropout)
         """
