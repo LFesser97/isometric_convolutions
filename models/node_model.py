@@ -103,7 +103,7 @@ class ComplexGCN(nn.Module):
             self.conv_layers.append(UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim, residual=True))
         self.hidden_layer = nn.Linear(self.hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
-        self.gcn_in_layer = UnitaryGCNConvLayer(self.input_dim, self.hidden_dim, residual=True)
+        self.gcn_in_layer = UnitaryGCNConvLayer(self.input_dim, self.hidden_dim)
         # self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
         self.gcn_mid_layer = UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim, residual=True)
         self.gcn_out_layer = GCNConv(hidden_layer_dim, output_dim)
