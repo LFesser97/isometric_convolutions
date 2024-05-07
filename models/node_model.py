@@ -113,7 +113,7 @@ class ComplexGCN(nn.Module):
         data.x = self.gcn_in_layer(data.x, data.edge_index)
         # print("Initial Layer Output:", data.x)
         for conv in self.conv_layers:
-            data.x = conv(data)
+            data.x = conv(data.x, data.edge_index)
             # print("Intermediate Layer Output:", data.x)
             # x_real = F.relu(x.real)
             # x_imag = F.relu(x.imag)
