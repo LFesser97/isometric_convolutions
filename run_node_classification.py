@@ -17,7 +17,7 @@ from custom_encodings import LocalCurvatureProfile
 
 
 default_args = AttrDict({
-    "dropout": 0.2,
+    "dropout": 0.5,
     "num_layers": 4,
     "hidden_dim": 512,
     "learning_rate": 3 * 1e-5,

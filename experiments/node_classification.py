@@ -21,7 +21,7 @@ default_args = AttrDict(
     "train_fraction": 0.5,
     "validation_fraction": 0.25,
     "test_fraction": 0.25,
-    "dropout": 0.0,
+    "dropout": 0.5,
     "weight_decay": 1e-5,
     "hidden_dim": 128,
     "hidden_layers": None,
