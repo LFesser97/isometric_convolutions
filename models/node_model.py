@@ -108,15 +108,16 @@ class ComplexGCN(nn.Module):
         self.reset_parameters()
 
     def forward(self, data):
-        x, edge_index = data.x, data.edge_index
-        x = self.gcn_in_layer(x, edge_index)
+        # x, edge_index = data.x, data.edge_index
+        # x = self.gcn_in_layer(x, edge_index)
+        data.x = self.gcn_in_layer(data.x, data.edge_index)
         for conv in self.conv_layers:
-            x = conv(x, edge_index)
-            x_real = F.relu(x.real)
-            x_imag = F.relu(x.imag)
-            x = torch.complex(x_real, x_imag)
+            data.x = conv(data)
+            # x_real = F.relu(x.real)
+            # x_imag = F.relu(x.imag)
+            # x = torch.complex(x_real, x_imag)
         # x = self.output_layer(x.real)
-        x = self.gcn_out_layer(x.real, edge_index)
+        x = self.gcn_out_layer(data.x.real, data.edge_index)
         return x
     
     def reset_parameters(self):
