@@ -139,7 +139,7 @@ class ComplexGCN(nn.Module):
         pass
 
     def forward(self, graph):
-        graph.x = self.norm(graph.x)
+        # graph.x = self.norm(graph.x)
         for i, layer in enumerate(self.conv_layers):
             graph = layer(graph)
             if i != self.num_layers - 1:
