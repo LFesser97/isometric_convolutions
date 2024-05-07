@@ -129,7 +129,8 @@ class ComplexGCN(nn.Module):
             # x_imag = F.relu(x.imag)
             # x = torch.complex(x_real, x_imag)
         # x = self.output_layer(x.real)
-        x = self.gcn_out_layer(data.x.real, data.edge_index)
+        # x = self.gcn_out_layer(data.x.real, data.edge_index)
+        x = self.output_layer(data.x.real)
         return x
     
     def reset_parameters(self):
