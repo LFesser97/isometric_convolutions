@@ -105,6 +105,7 @@ class ComplexGCN(nn.Module):
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
         self.gcn_in_layer = UnitaryGCNConvLayer(input_dim, hidden_dim)
         # self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
+        self.gcn_mid_layer = GCNConv(hidden_dim, hidden_dim)
         self.gcn_out_layer = GCNConv(hidden_layer_dim, output_dim)
         self.reset_parameters()
 
@@ -113,10 +114,13 @@ class ComplexGCN(nn.Module):
         # x = self.gcn_in_layer(x, edge_index)
         # data.x = self.gcn_in_layer(data.x, data.edge_index)
         # print("Initial Layer Output:", data.x)
-        print("Original Data Shape:", data.x.shape, data.edge_index.shape)
-        data = self.gcn_in_layer(data)
+        if self.input_dim != self.hidden_dim:
+            print("Original Data Shape:", data.x.shape, data.edge_index.shape)
+            data = self.gcn_in_layer(data)
+        else:
+            data = self.gcn_mid_layer(data)
         for conv in self.conv_layers:
-            print("Visited conv layer")
+            # print("Visited conv layer")
             data = conv(data)
             # print("Intermediate Layer Output:", data.x)
             # x_real = F.relu(x.real)
