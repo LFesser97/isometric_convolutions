@@ -5,6 +5,7 @@ from torch.nn import ModuleList, Dropout, ReLU
 from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GatedGraphConv, GINConv, FiLMConv, global_mean_pool, GATConv, SuperGATConv, global_max_pool
 import torch.nn.functional as F
 from models.layers import TaylorGCNConv, ComplexGCNConv
+from models.test_layers import UnitaryGCNConvLayer
 
 class RGATConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
@@ -107,6 +108,7 @@ class GNN(torch.nn.Module):
         return x
     
 
+"""
 class ComplexGCN(nn.Module):
     def __init__(self, args):
         super(ComplexGCN, self).__init__()
@@ -138,6 +140,38 @@ class ComplexGCN(nn.Module):
             x_imag = self.dropout(x_imag) # added dropout
             x = torch.complex(x_real, x_imag)
         x = global_mean_pool(x.real, data.batch)  # Global pooling over nodes
+        x = F.relu(self.hidden_layer(x))  # Hidden layer with ReLU activation
+        x = self.output_layer(x)  # Output layer
+        return x.squeeze()
+    
+    def reset_parameters(self):
+        pass
+"""
+
+
+class ComplexGCN(nn.Module):
+    def __init__(self, args):
+        super(ComplexGCN, self).__init__()
+        self.conv_layers = nn.ModuleList()
+        input_dim = args.input_dim
+        hidden_dim = 128
+        output_dim = args.output_dim
+        num_layers = 4
+        hidden_layer_dim = 128
+        self.T = 20
+        self.dropout = Dropout(p=args.dropout)
+        self.conv_layers = nn.ModuleList()
+        for _ in range(num_layers):
+            self.conv_layers.append(UnitaryGCNConvLayer(input_dim, hidden_dim))
+            input_dim = hidden_dim
+        self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
+        self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
+        self.reset_parameters()
+
+    def forward(self, data):
+        for conv in self.conv_layers:
+            data = conv(data)
+        x = global_mean_pool(data.x.real, data.batch)  # Global pooling over nodes
         x = F.relu(self.hidden_layer(x))  # Hidden layer with ReLU activation
         x = self.output_layer(x)  # Output layer
         return x.squeeze()
