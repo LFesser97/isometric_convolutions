@@ -66,7 +66,7 @@ class Experiment:
         
     def run(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
-        # scheduler = ReduceLROnPlateau(optimizer,  patience=25, factor=0.1)
+        scheduler = ReduceLROnPlateau(optimizer,  patience=25, factor=0.1)
 
         if self.args.display:
             print("Starting training")
@@ -96,7 +96,10 @@ class Experiment:
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-            # scheduler.step(loss)
+            scheduler.step(loss)
+
+            current_lr = optimizer.param_groups[0]['lr']
+            print("Current learning rate:", current_lr)
 
             new_best_str = ''
 
