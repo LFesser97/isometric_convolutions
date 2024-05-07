@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import copy
 from torch.nn import ModuleList, Dropout, ReLU
 from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GINConv, FiLMConv, global_mean_pool
 import torch.nn.functional as F
@@ -138,7 +139,8 @@ class ComplexGCN(nn.Module):
     def reset_parameters(self):
         pass
 
-    def forward(self, graph):
+    def forward(self, data):
+        graph = copy.deepcopy(data)
         # graph.x = self.norm(graph.x)
         for i, layer in enumerate(self.conv_layers):
             graph = layer(graph)
