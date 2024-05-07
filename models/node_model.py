@@ -88,7 +88,7 @@ class ComplexGCN(nn.Module):
         self.hidden_dim = args.hidden_dim
         self.norm = torch.nn.LayerNorm(self.input_dim)
         output_dim = args.output_dim
-        num_layers = args.num_layers
+        self.num_layers = args.num_layers
         self.T = args.T
         self.dropout = Dropout(p=args.dropout)
         """
@@ -100,7 +100,7 @@ class ComplexGCN(nn.Module):
             # input_dim = hidden_dim
         """
         self.conv_layers.append(UnitaryGCNConvLayer(self.input_dim, self.hidden_dim))
-        for _ in range(num_layers):
+        for _ in range(self.num_layers):
             self.conv_layers.append(UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim, use_hermitian=True))
         self.output_layer = nn.Linear(self.hidden_dim, output_dim)
         self.gcn_in_layer = UnitaryGCNConvLayer(self.input_dim, self.hidden_dim)
@@ -140,7 +140,7 @@ class ComplexGCN(nn.Module):
 
     def forward(self, graph):
         graph.x = self.norm(graph.x)
-        for i, layer in enumerate(self.layers):
+        for i, layer in enumerate(self.conv_layers):
             graph = layer(graph)
             if i != self.num_layers - 1:
                 # x = self.act_fn(x)
