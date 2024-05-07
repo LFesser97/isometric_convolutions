@@ -111,6 +111,7 @@ class ComplexGCN(nn.Module):
         # x, edge_index = data.x, data.edge_index
         # x = self.gcn_in_layer(x, edge_index)
         data.x = self.gcn_in_layer(data.x, data.edge_index)
+        print(data.x)
         for conv in self.conv_layers:
             data.x = conv(data)
             # x_real = F.relu(x.real)
