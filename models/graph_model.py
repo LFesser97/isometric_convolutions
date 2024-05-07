@@ -161,9 +161,9 @@ class ComplexGCN(nn.Module):
         self.T = 20
         self.dropout = Dropout(p=args.dropout)
         self.conv_layers = nn.ModuleList()
+        self.conv_layers.append(UnitaryGCNConvLayer(input_dim, hidden_dim))
         for _ in range(num_layers):
-            self.conv_layers.append(UnitaryGCNConvLayer(input_dim, hidden_dim))
-            input_dim = hidden_dim
+            self.conv_layers.append(UnitaryGCNConvLayer(hidden_dim, hidden_dim, residual=True))
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
         self.reset_parameters()
