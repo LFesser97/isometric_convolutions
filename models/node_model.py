@@ -84,8 +84,8 @@ class ComplexGCN(nn.Module):
     def __init__(self, args):
         super(ComplexGCN, self).__init__()
         self.conv_layers = nn.ModuleList()
-        input_dim = args.input_dim
-        hidden_dim = args.hidden_dim
+        self.input_dim = args.input_dim
+        self.hidden_dim = args.hidden_dim
         output_dim = args.output_dim
         num_layers = args.num_layers
         hidden_layer_dim = hidden_dim
@@ -100,12 +100,12 @@ class ComplexGCN(nn.Module):
             # input_dim = hidden_dim
         """
         for _ in range(num_layers):
-            self.conv_layers.append(UnitaryGCNConvLayer(hidden_dim, hidden_dim))
-        self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
+            self.conv_layers.append(UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim))
+        self.hidden_layer = nn.Linear(self.hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
-        self.gcn_in_layer = UnitaryGCNConvLayer(input_dim, hidden_dim)
+        self.gcn_in_layer = UnitaryGCNConvLayer(self.input_dim, self.hidden_dim)
         # self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
-        self.gcn_mid_layer = GCNConv(hidden_dim, hidden_dim)
+        self.gcn_mid_layer = GCNConv(self.hidden_dim, self.hidden_dim)
         self.gcn_out_layer = GCNConv(hidden_layer_dim, output_dim)
         self.reset_parameters()
 
