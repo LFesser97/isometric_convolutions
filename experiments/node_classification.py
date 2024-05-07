@@ -98,7 +98,7 @@ class Experiment:
             optimizer.zero_grad()
             scheduler.step(loss)
 
-            current_lr = optimizer.param_groups[0]['lr']
+            current_lr = scheduler.get_last_lr()
             print("Current learning rate:", current_lr)
 
             new_best_str = ''
