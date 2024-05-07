@@ -116,7 +116,7 @@ class ComplexGCN(nn.Module):
         # print("Initial Layer Output:", data.x)
         print(data.x.shape)
         print(self.input_dim)
-        if data.x.shape != self.input_dim:
+        if data.x.shape == self.input_dim:
             print("Original Data Shape:", data.x.shape, data.edge_index.shape)
             data = self.gcn_in_layer(data)
         else:
