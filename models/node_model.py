@@ -144,5 +144,6 @@ class ComplexGCN(nn.Module):
             graph = layer(graph)
             if i != self.num_layers - 1:
                 # x = self.act_fn(x)
-                graph.x = self.dropout(graph.x)
+                graph.x.real = self.dropout(graph.x.real)
+                graph.x.imag = self.dropout(graph.x.imag)
         return self.output_layer(graph.x.real)
