@@ -96,7 +96,7 @@ class Experiment:
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-            scheduler.step(loss)
+            # scheduler.step(loss)
 
             new_best_str = ''
 
