@@ -86,9 +86,9 @@ class ComplexGCN(nn.Module):
         self.conv_layers = nn.ModuleList()
         self.input_dim = args.input_dim
         self.hidden_dim = args.hidden_dim
+        self.norm = torch.nn.LayerNorm(self.input_dim)
         output_dim = args.output_dim
         num_layers = args.num_layers
-        hidden_layer_dim = self.hidden_dim
         self.T = args.T
         self.dropout = Dropout(p=args.dropout)
         """
@@ -99,16 +99,17 @@ class ComplexGCN(nn.Module):
             self.conv_layers.append(taylor_layer)
             # input_dim = hidden_dim
         """
+        self.conv_layers.append(UnitaryGCNConvLayer(self.input_dim, self.hidden_dim))
         for _ in range(num_layers):
             self.conv_layers.append(UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim, use_hermitian=True))
-        self.hidden_layer = nn.Linear(self.hidden_dim, hidden_layer_dim)
-        self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
+        self.output_layer = nn.Linear(self.hidden_dim, output_dim)
         self.gcn_in_layer = UnitaryGCNConvLayer(self.input_dim, self.hidden_dim)
         # self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
         self.gcn_mid_layer = UnitaryGCNConvLayer(self.hidden_dim, self.hidden_dim, use_hermitian=True)
-        self.gcn_out_layer = GCNConv(hidden_layer_dim, output_dim)
+        self.gcn_out_layer = GCNConv(self.hidden_dim, output_dim)
         self.reset_parameters()
 
+    """
     def forward(self, data):
         # x, edge_index = data.x, data.edge_index
         # x = self.gcn_in_layer(x, edge_index)
@@ -132,6 +133,16 @@ class ComplexGCN(nn.Module):
         x = self.gcn_out_layer(data.x.real, data.edge_index)
         # x = self.output_layer(data.x.real)
         return x
+    """
     
     def reset_parameters(self):
         pass
+
+    def forward(self, graph):
+        graph.x = self.norm(graph.x)
+        for i, layer in enumerate(self.layers):
+            graph = layer(graph)
+            if i != self.num_layers - 1:
+                # x = self.act_fn(x)
+                graph.x = self.dropout(graph.x)
+        return self.output_layer(graph.x.real)
