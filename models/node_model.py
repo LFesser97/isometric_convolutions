@@ -100,7 +100,7 @@ class ComplexGCN(nn.Module):
             # input_dim = hidden_dim
         """
         for _ in range(num_layers):
-            self.conv_layers.append((hidden_dim, hidden_dim))
+            self.conv_layers.append(UnitaryGCNConvLayer(hidden_dim, hidden_dim))
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
         self.gcn_in_layer = UnitaryGCNConvLayer(input_dim, hidden_dim)
