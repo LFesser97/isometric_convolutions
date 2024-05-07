@@ -5,6 +5,7 @@ from torch_geometric.nn import GCNConv, RGCNConv, SAGEConv, GINConv, FiLMConv, g
 import torch.nn.functional as F
 
 from models.layers import TaylorGCNConv, ComplexGCNConv
+from models.test_layers import UnitaryGCNConvLayer
 
 class RGINConv(torch.nn.Module):
     def __init__(self, in_features, out_features, num_relations):
@@ -90,12 +91,16 @@ class ComplexGCN(nn.Module):
         hidden_layer_dim = hidden_dim
         self.T = args.T
         self.dropout = Dropout(p=args.dropout)
+        """
         for _ in range(num_layers):
             # sample_layer = ComplexGCNConv(input_dim, hidden_dim)
             sample_layer = ComplexGCNConv(hidden_dim, hidden_dim)
             taylor_layer = TaylorGCNConv(sample_layer, T=self.T)
             self.conv_layers.append(taylor_layer)
             # input_dim = hidden_dim
+        """
+        for _ in range(num_layers):
+            self.conv_layers.append(UnitaryGCNConvLayer(hidden_dim, hidden_dim))
         self.hidden_layer = nn.Linear(hidden_dim, hidden_layer_dim)
         self.output_layer = nn.Linear(hidden_layer_dim, output_dim)
         self.gcn_in_layer = GCNConv(input_dim, hidden_dim)
@@ -108,9 +113,7 @@ class ComplexGCN(nn.Module):
         for conv in self.conv_layers:
             x = conv(x, edge_index)
             x_real = F.relu(x.real)
-            x_real = self.dropout(x_real)
             x_imag = F.relu(x.imag)
-            x_imag = self.dropout(x_imag)
             x = torch.complex(x_real, x_imag)
         # x = self.output_layer(x.real)
         x = self.gcn_out_layer(x.real, edge_index)
