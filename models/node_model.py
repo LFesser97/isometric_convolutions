@@ -113,7 +113,7 @@ class ComplexGCN(nn.Module):
         # x = self.gcn_in_layer(x, edge_index)
         # data.x = self.gcn_in_layer(data.x, data.edge_index)
         # print("Initial Layer Output:", data.x)
-        print("Original Data Shape:", data.x.shape(), data.edge_index.shape())
+        print("Original Data Shape:", data.x.shape, data.edge_index.shape)
         data = self.gcn_in_layer(data)
         for conv in self.conv_layers:
             data = conv(data)
