@@ -154,10 +154,10 @@ class ComplexGCN(nn.Module):
         super(ComplexGCN, self).__init__()
         self.conv_layers = nn.ModuleList()
         input_dim = args.input_dim
-        hidden_dim = 128
+        hidden_dim = 256
         output_dim = args.output_dim
-        num_layers = 4
-        hidden_layer_dim = 128
+        num_layers = 6
+        hidden_layer_dim = 256
         self.T = 20
         self.dropout = Dropout(p=args.dropout)
         self.conv_layers = nn.ModuleList()
