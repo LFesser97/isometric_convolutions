@@ -270,23 +270,17 @@ for key in datasets:
     log_to_file(f"plus/minus:  {test_ci}\n\n")
     results.append({
         "dataset": key,
-        "rewiring": args.rewiring,
         "layer_type": args.layer_type,
-        "num_iterations": args.num_iterations,
-        "borf_batch_add" : args.borf_batch_add,
-        "borf_batch_remove" : args.borf_batch_remove,
-        "sdrf_remove_edges" : args.sdrf_remove_edges, 
-        "alpha": args.alpha,
-        "eps": args.eps,
+        "num_layers": args.num_layers,
+        "hidden_dim": args.hidden_dim,
+        "learning_rate": args.learning_rate,
+        "dropout": args.dropout,
         "test_mean": test_mean,
         "test_ci": test_ci,
         "val_mean": val_mean,
         "val_ci": val_ci,
         "train_mean": train_mean,
         "train_ci": train_ci,
-        "energy_mean": energy_mean,
-        "energy_ci": energy_ci,
-        "last_layer_fa": args.last_layer_fa,
         "run_duration" : run_duration,
     })
 
