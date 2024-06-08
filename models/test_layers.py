@@ -340,6 +340,138 @@ class ComplexGCNConv(MessagePassing):
         return spmm(adj_t, x, reduce=self.aggr)
     
 
+class ComplexGINEConv(MessagePassing):
+    _cached_edge_index: Optional[OptPairTensor]
+    _cached_adj_t: Optional[SparseTensor]
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        improved: bool = False,
+        cached: bool = False,
+        add_self_loops: Optional[bool] = False,
+        normalize: bool = True,
+        bias: bool = True,
+        edge_dim: Optional[int] = None,
+        **kwargs,
+    ):
+        kwargs.setdefault('aggr', 'add')
+        super().__init__(**kwargs)
+
+        if add_self_loops is None:
+            add_self_loops = normalize
+
+        if add_self_loops and not normalize:
+            raise ValueError(f"'{self.__class__.__name__}' does not support "
+                             f"adding self-loops to the graph when no "
+                             f"on-the-fly normalization is applied")
+
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.improved = improved
+        self.cached = cached
+        self.add_self_loops = add_self_loops
+        self.normalize = normalize
+
+        self._cached_edge_index = None
+        self._cached_adj_t = None
+
+        # self.lin = Linear(in_channels, out_channels, bias=False,
+        #                   weight_initializer='glorot')
+        self.lin = torch.nn.Linear(in_channels, out_channels, bias=False)
+        self.lin.weight.data = init.orthogonal_(self.lin.weight.data)
+        self.lin.weight = torch.nn.Parameter(torch.complex(self.lin.weight, torch.zeros_like(self.lin.weight)))
+
+        if edge_dim is not None:
+            self.edge_lin = torch.nn.Linear(edge_dim, in_channels, bias=False)
+            self.edge_lin.weight.data = init.orthogonal_(self.edge_lin.weight.data)
+            self.edge_lin.weight = torch.nn.Parameter(torch.complex(self.edge_lin.weight, torch.zeros_like(self.edge_lin.weight)))
+        else:
+            self.edge_lin = None
+
+        if bias:
+            self.bias = torch.nn.Parameter(torch.zeros(out_channels, dtype=torch.cfloat))
+        else:
+            self.register_parameter('bias', None)
+
+        self.reset_parameters()
+
+
+    def reset_parameters(self):
+        super().reset_parameters()
+        self.lin.reset_parameters()
+        self._cached_edge_index = None
+        self._cached_adj_t = None
+        if self.bias is not None:
+            zeros(self.bias)
+
+
+    def forward(self, x: Tensor, edge_index: Adj,
+                edge_attr: OptTensor = None,
+                edge_weight: OptTensor = None,
+                apply_feature_lin: bool = True,
+                return_feature_only: bool = False) -> Tensor:
+
+        if isinstance(x, (tuple, list)):
+            raise ValueError(f"'{self.__class__.__name__}' received a tuple "
+                             f"of node features as input while this layer "
+                             f"does not support bipartite message passing. "
+                             f"Please try other layers such as 'SAGEConv' or "
+                             f"'GraphConv' instead")
+
+        if apply_feature_lin:
+            if not torch.is_complex(x):
+                x = torch.complex(x, torch.zeros_like(x))
+            x = self.lin(x)
+            if self.bias is not None:
+                x = x + self.bias
+            if return_feature_only:
+                return x
+
+        if self.normalize:
+            if isinstance(edge_index, Tensor):
+                cache = self._cached_edge_index
+                if cache is None:
+                    edge_index, edge_weight = gcn_norm(  # yapf: disable
+                        edge_index, edge_weight, x.size(self.node_dim),
+                        self.improved, self.add_self_loops, self.flow, x.dtype)
+                    if self.cached:
+                        self._cached_edge_index = (edge_index, edge_weight)
+                else:
+                    edge_index, edge_weight = cache[0], cache[1]
+
+            elif isinstance(edge_index, SparseTensor):
+                cache = self._cached_adj_t
+                if cache is None:
+                    edge_index = gcn_norm(  # yapf: disable
+                        edge_index, edge_weight, x.size(self.node_dim),
+                        self.improved, self.add_self_loops, self.flow, x.dtype)
+                    if self.cached:
+                        self._cached_adj_t = edge_index
+                else:
+                    edge_index = cache
+
+        # propagate_type: (x: Tensor, edge_weight: OptTensor)
+        out = 1j*self.propagate(edge_index, x=x, edge_weight=edge_weight, edge_attr=edge_attr)
+
+        return out
+
+    # def message(self, x_j: Tensor, edge_weight: OptTensor) -> Tensor:
+        # return x_j if edge_weight is None else edge_weight.view(-1, 1) * x_j
+    
+    def message(self, x_j: Tensor, edge_attr: Tensor, edge_weight: OptTensor) -> Tensor:
+        if self.edge_lin is not None:
+            edge_attr = self.edge_lin(edge_attr)
+        if edge_weight is not None:
+            message = (x_j + edge_attr) * edge_weight.view(-1, 1)
+        else:
+            message = x_j + edge_attr
+        return torch.complex(F.relu(message.real), F.relu(message.imag))
+
+    def message_and_aggregate(self, adj_t: Adj, x: Tensor) -> Tensor:
+        return spmm(adj_t, x, reduce=self.aggr)
+
 
 class TaylorGCNConv(MessagePassing):
     def __init__(
@@ -483,3 +615,134 @@ def gcn_norm(  # noqa: F811
     edge_weight = deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
 
     return edge_index, edge_weight
+
+
+class GINEConv(MessagePassing):
+    """
+    Args:
+        nn (torch.nn.Module): A neural network :math:`h_{\mathbf{\Theta}}` that
+            maps node features :obj:`x` of shape :obj:`[-1, in_channels]` to
+            shape :obj:`[-1, out_channels]`, *e.g.*, defined by
+            :class:`torch.nn.Sequential`.
+        eps (float, optional): (Initial) :math:`\epsilon`-value.
+            (default: :obj:`0.`)
+        train_eps (bool, optional): If set to :obj:`True`, :math:`\epsilon`
+            will be a trainable parameter. (default: :obj:`False`)
+        edge_dim (int, optional): Edge feature dimensionality. If set to
+            :obj:`None`, node and edge feature dimensionality is expected to
+            match. Other-wise, edge features are linearly transformed to match
+            node feature dimensionality. (default: :obj:`None`)
+        **kwargs (optional): Additional arguments of
+            :class:`torch_geometric.nn.conv.MessagePassing`.
+    """
+    def __init__(self, nn: torch.nn.Module, eps: float = 0.,
+                 train_eps: bool = False, edge_dim: Optional[int] = None,
+                 **kwargs):
+        kwargs.setdefault('aggr', 'add')
+        super().__init__(**kwargs)
+        self.nn = nn
+        self.initial_eps = eps
+        if train_eps:
+            self.eps = torch.nn.Parameter(torch.empty(1))
+        else:
+            self.register_buffer('eps', torch.empty(1))
+        if edge_dim is not None:
+            if isinstance(self.nn, torch.nn.Sequential):
+                nn = self.nn[0]
+            if hasattr(nn, 'in_features'):
+                in_channels = nn.in_features
+            elif hasattr(nn, 'in_channels'):
+                in_channels = nn.in_channels
+            else:
+                raise ValueError("Could not infer input channels from `nn`.")
+            self.lin = Linear(edge_dim, in_channels)
+
+        else:
+            self.lin = None
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        reset(self.nn)
+        self.eps.data.fill_(self.initial_eps)
+        if self.lin is not None:
+            self.lin.reset_parameters()
+
+
+    def forward(
+        self,
+        x: Union[Tensor, OptPairTensor],
+        edge_index: Adj,
+        edge_attr: OptTensor = None,
+        size: Size = None,
+    ) -> Tensor:
+
+        if isinstance(x, Tensor):
+            x = (x, x)
+
+        # propagate_type: (x: OptPairTensor, edge_attr: OptTensor)
+        out = self.propagate(edge_index, x=x, edge_attr=edge_attr, size=size)
+        x_r = x[1]
+        if x_r is not None:
+            out = out + (1 + self.eps) * x_r
+
+        return self.nn(out)
+    
+
+    def message(self, x_j: Tensor, edge_attr: Tensor) -> Tensor:
+        if self.lin is None and x_j.size(-1) != edge_attr.size(-1):
+            raise ValueError("Node and edge feature dimensionalities do not "
+                             "match. Consider setting the 'edge_dim' "
+                             "attribute of 'GINEConv'")
+
+        if self.lin is not None:
+            edge_attr = self.lin(edge_attr)
+
+        return (x_j + edge_attr).relu()
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}(nn={self.nn})'
+    
+
+class UnitaryGINEConvLayer(nn.Module):
+    def __init__(self, dim_in, dim_out, dropout = 0.0, residual = True, global_bias = True, T = 10, use_hermitian = False, **kwargs):
+        super().__init__()
+        self.dim_in = dim_in
+        self.dim_out = dim_out
+        self.dropout = dropout
+        self.residual = residual
+        self.nn = torch.nn.Sequential(
+            torch.nn.Linear(2*dim_out, 2*dim_out),
+            torch.nn.ReLU(),
+            torch.nn.Linear(2*dim_out, 2*dim_out),
+        )
+        if global_bias:
+            self.bias = torch.nn.Parameter(torch.zeros(dim_out, dtype=torch.cfloat))
+        else:
+            self.register_parameter('bias', None)
+
+        if use_hermitian:
+            raise NotImplementedError("Hermitian GINEConv not implemented yet")
+        else:
+            base_conv = ComplexGINEConv
+
+        self.act = nn.Sequential(
+            ComplexActivation(torch.nn.ReLU()),
+            ComplexDropout(self.dropout),
+        )
+        self.model = TaylorGCNConv(base_conv(dim_in, dim_out, **kwargs), T = T)
+
+    def forward(self, batch):
+        x_in = batch.x
+
+        batch.x = self.model(batch.x, batch.edge_index)
+        if self.residual:
+            batch.x = x_in + batch.x
+        # split real and imaginary parts
+        x_real = batch.x.real
+        x_imag = batch.x.imag
+        # concatenate them
+        x = torch.cat([x_real, x_imag], dim=-1)
+        # pass through neural network
+        batch.x = self.nn(x)
+        
+        return batch
