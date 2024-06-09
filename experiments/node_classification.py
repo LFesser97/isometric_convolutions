@@ -66,11 +66,11 @@ class Experiment:
         
     def run(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
-        # scheduler = ReduceLROnPlateau(optimizer,  patience=25, factor=0.1)
+        scheduler = ReduceLROnPlateau(optimizer,  patience=25, factor=0.1)
         step_size = 25  # Specify the number of epochs after which to decrease the learning rate
         gamma = 0.1     # Specify the factor by which to decrease the learning rate
 
-        scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
+        # scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
 
         if self.args.display:
             print("Starting training")
