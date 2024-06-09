@@ -28,7 +28,7 @@ default_args = AttrDict({
     "rewiring": None,
     "num_iterations": 10,
     "num_relations": 2,
-    "patience": 50,
+    "patience": 500,
     "dataset": None,
     "borf_batch_add" : 4,
     "borf_batch_remove" : 2,

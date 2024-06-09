@@ -11,13 +11,13 @@ from models.node_model import GCN, ComplexGCN
 
 default_args = AttrDict(
     {"learning_rate": 0.0007, # 1e-3,
-    "max_epochs": 1000000,
+    "max_epochs": 1000,
     "display": True,
     "device": None,
     "eval_every": 1,
     "stopping_criterion": "validation",
     "stopping_threshold": 1.01,
-    "patience": 50,
+    "patience": 500,
     "train_fraction": 0.5,
     "validation_fraction": 0.25,
     "test_fraction": 0.25,
