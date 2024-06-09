@@ -101,10 +101,13 @@ else:
     # tolokers = HeterophilousGraphDataset(root="data", name="Tolokers", transform=largest_cc)
     # questions = HeterophilousGraphDataset(root="data", name="Questions", transform=largest_cc)
 
+"""
 datasets = {"cornell": cornell, "wisconsin": wisconsin, "texas": texas, "chameleon": chameleon,
             "cora": cora, "citeseer": citeseer, "pubmed": pubmed, "roman_empire": roman_empire,
             "amazon_ratings": amazon_ratings, "minesweeper": minesweeper}
+"""
 
+datasets = {"roman_empire": roman_empire, "amazon_ratings": amazon_ratings, "minesweeper": minesweeper}
 
 for key in datasets:
     dataset = datasets[key]
@@ -211,14 +214,14 @@ for key in datasets:
     log_to_file(f"plus/minus:  {2 * np.std(accuracies)/(args.num_trials ** 0.5)}\n\n")
     results.append({
         "dataset": key,
-        "rewiring": args.rewiring,
-        "num_iterations": args.num_iterations,
-        "borf_batch_add" : args.borf_batch_add,
-        "borf_batch_remove" : args.borf_batch_remove,
-        "avg_accuracy": np.mean(accuracies),
+        "layer_type": args.layer_type,
+        "num_layers": args.num_layers,
+        "hidden_dim": args.hidden_dim,
+        "learning_rate": args.learning_rate,
+        "dropout": args.dropout,
+        "test_mean": np.mean(accuracies),
         "ci":  2 * np.std(accuracies)/(args.num_trials ** 0.5),
         "run_duration" : run_duration,
-        #"rewiring_duration" : rewiring_duration
     })
     results_df = pd.DataFrame(results)
     with open(f'results/node_classification_{args.layer_type}_{args.rewiring}.csv', 'a') as f:
