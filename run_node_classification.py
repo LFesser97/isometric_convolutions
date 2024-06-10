@@ -23,10 +23,10 @@ default_args = AttrDict({
     "learning_rate": 3 * 1e-5,
     "layer_type": "R-GCN",
     "display": True,
-    "num_trials": 100,
+    "num_trials": 10,
     "eval_every": 1,
     "rewiring": None,
-    "num_iterations": 10,
+    "num_iterations": 1,
     "num_relations": 2,
     "patience": 500,
     "dataset": None,
@@ -200,12 +200,16 @@ for key in datasets:
     start = time.time()
     for trial in range(args.num_trials):
         print(f"TRIAL #{trial+1}")
+        train_accs = []
         test_accs = []
         for i in range(args.num_splits):
             train_acc, validation_acc, test_acc = Experiment(args=args, dataset=dataset).run()
+            train_accs.append(train_acc)
             test_accs.append(test_acc)
+        train_acc = max(train_accs)
         test_acc = max(test_accs)
-        accuracies.append(test_acc)
+        # accuracies.append(test_acc)
+        accuracies.append(train_acc)
     end = time.time()
     run_duration = end - start
 
@@ -219,7 +223,8 @@ for key in datasets:
         "hidden_dim": args.hidden_dim,
         "learning_rate": args.learning_rate,
         "dropout": args.dropout,
-        "test_mean": np.mean(accuracies),
+        "train_mean": np.mean(accuracies),
+        # "test_mean": np.mean(accuracies),
         "ci":  2 * np.std(accuracies)/(args.num_trials ** 0.5),
         "run_duration" : run_duration,
     })
