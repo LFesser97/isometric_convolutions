@@ -6,7 +6,7 @@ from torch.utils.data import random_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from math import inf
 
-from models.graph_model import GNN, ComplexGCN
+from models.graph_model import GNN, OrthogonalGCN, UnitaryGCN
 
 default_args = AttrDict(
     {"learning_rate": 1e-3,
@@ -14,7 +14,7 @@ default_args = AttrDict(
     "display": True,
     "device": None,
     "eval_every": 1,
-    "stopping_criterion": "train",# "validation",
+    "stopping_criterion": "validation",
     "stopping_threshold": 1.01,
     "patience": 20,
     "train_fraction": 0.5,
@@ -59,8 +59,12 @@ class Experiment:
             else:
                 self.args.num_relations = 2
 
-        if self.args.layer_type == "Complex":
-            self.model = ComplexGCN(self.args).to(self.args.device)
+        # if self.args.layer_type == "Complex":
+            # self.model = ComplexGCN(self.args).to(self.args.device)
+        if self.args.layer_type == "Orthogonal":
+            self.model = OrthogonalGCN(self.args).to(self.args.device)
+        if self.args.layer_type == "Unitary":
+            self.model = UnitaryGCN(self.args).to(self.args.device)
         else:
             self.model = GNN(self.args).to(self.args.device)
        
