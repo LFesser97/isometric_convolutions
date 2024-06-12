@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Define the lists for each parameter
-layer_types=("GCN" "GIN" "R-GAT")
-num_layers_list=(3 4 5)
-learning_rates=(0.001 0.0001 0.00001)
+layer_types=("Unitary")
+num_layers_list=(5 10 15)
+learning_rates=(0.01 0.001 0.0001)
 dropouts=(0.2 0.3 0.4)
 
 # Nested loops to iterate over each combination of parameters

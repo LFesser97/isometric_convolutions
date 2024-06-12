@@ -63,10 +63,8 @@ class Experiment:
             # self.model = ComplexGCN(self.args).to(self.args.device)
         if self.args.layer_type == "Orthogonal":
             self.model = OrthogonalGCN(self.args).to(self.args.device)
-            print("Using OrthogonalGCN")
         if self.args.layer_type == "Unitary":
             self.model = UnitaryGCN(self.args).to(self.args.device)
-            print("Using UnitaryGCN")
         else:
             self.model = GNN(self.args).to(self.args.device)
        
