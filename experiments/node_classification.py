@@ -27,7 +27,7 @@ default_args = AttrDict(
     "hidden_layers": None,
     "num_layers": 3,
     "batch_size": 32,
-    "layer_type": "GCN",
+    "layer_type": "Unitary",
     "num_relations": 1,
     "T": 20
     }

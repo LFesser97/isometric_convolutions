@@ -21,7 +21,7 @@ default_args = AttrDict({
     "num_layers": 4,
     "hidden_dim": 512,
     "learning_rate": 3 * 1e-5,
-    "layer_type": "R-GCN",
+    "layer_type": "Unitary",
     "display": True,
     "num_trials": 10,
     "eval_every": 1,
