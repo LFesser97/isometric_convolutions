@@ -52,12 +52,11 @@ class Experiment:
 
         if self.args.layer_type == "Complex":
             self.model = ComplexGCN(self.args).to(self.args.device)
-        if self.args.layer_type == "Unitary":
-            self.model = UnitaryGCN(self.args).to(self.args.device)
         if self.args.layer_type == "Orthogonal":
             self.model = OrthogonalGCN(self.args).to(self.args.device)
-        else:
-            self.model = GCN(self.args).to(self.args.device)
+        # else:
+            # self.model = GCN(self.args).to(self.args.device)
+        self.model = UnitaryGCN(self.args).to(self.args.device)
 
         if self.test_mask is None:
             node_indices = list(range(self.num_nodes))
