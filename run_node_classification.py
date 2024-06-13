@@ -208,8 +208,8 @@ for key in datasets:
             test_accs.append(test_acc)
         train_acc = max(train_accs)
         test_acc = max(test_accs)
-        # accuracies.append(test_acc)
-        accuracies.append(train_acc)
+        accuracies.append(test_acc)
+        # accuracies.append(train_acc)
     end = time.time()
     run_duration = end - start
 
@@ -223,8 +223,8 @@ for key in datasets:
         "hidden_dim": args.hidden_dim,
         "learning_rate": args.learning_rate,
         "dropout": args.dropout,
-        "train_mean": np.mean(accuracies),
-        # "test_mean": np.mean(accuracies),
+        # "train_mean": np.mean(accuracies),
+        "test_mean": np.mean(accuracies),
         "ci":  2 * np.std(accuracies)/(args.num_trials ** 0.5),
         "run_duration" : run_duration,
     })
