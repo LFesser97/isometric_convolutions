@@ -53,7 +53,7 @@ gnn:
   act: c_gelu
   residual: True
   dropout: 0.1
-  use_hermitian: False
+  use_hermitian: True
 optim:
   clip_grad_norm: True
   optimizer: adamW
