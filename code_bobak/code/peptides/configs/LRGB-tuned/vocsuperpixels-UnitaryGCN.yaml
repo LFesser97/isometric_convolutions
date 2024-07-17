@@ -52,7 +52,7 @@ gnn:
   normalize_adj: True
   act: c_gelu
   residual: True
-  dropout: 0.1
+  dropout: 0.2
   use_hermitian: True
 optim:
   clip_grad_norm: True
