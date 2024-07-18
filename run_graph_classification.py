@@ -6,8 +6,6 @@ import torch_geometric.transforms as T
 
 # import custom encodings
 from torchvision.transforms import Compose
-from custom_encodings import LocalCurvatureProfile, AltLocalCurvatureProfile
-
 from experiments.graph_classification import Experiment
 
 
@@ -17,7 +15,6 @@ import torch
 import numpy as np
 import pandas as pd
 from hyperparams import get_args_from_input
-from preprocessing import rewiring, sdrf, fosr, digl, borf
 
 import pickle
 import wget

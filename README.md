@@ -12,11 +12,11 @@ pip install -r requirements.txt
 ### 1. For graph classification
 To run experiments for the TUDataset benchmark, run the file ```run_graph_classification.py```. The following command will run the benchmark with a GCN with 4 UniConv layers:
 ```bash
-python run_graph_classification.py --layer_type Complex --num_layers 4
+python run_graph_classification.py --layer_type Unitary --num_layers 4
 ```
 
 ### 2. For node classification
 To run node classification, simply change the script name to `run_node_classification.py`. For example:
 ```bash
-python run_node_classification.py --dataset tolokers --layer_type Complex
+python run_node_classification.py --dataset tolokers --layer_type Unitary
 ```
