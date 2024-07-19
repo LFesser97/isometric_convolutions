@@ -45,7 +45,7 @@ model:
 gnn:
   head: inductive_node
   layers_pre_mp: 0
-  layers_mp: 10
+  layers_mp: 14
   layers_post_mp: 3
   dim_inner: 200
   layer_type: unitarygcnconv
