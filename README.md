@@ -20,3 +20,5 @@ To run node classification, simply change the script name to `run_node_classific
 ```bash
 python run_node_classification.py --dataset tolokers --layer_type Unitary
 ```
+### 3. LRGB and Ring Tasks
+See the folder ```lrgb_and_rings```.
