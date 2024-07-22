@@ -1,5 +1,5 @@
 
-# Peptides evaluation
+# LRGB evaluation
 Evaluation taken from (https://github.com/toenshoff/LRGB/tree/main) which is based on the GPS codebase: https://github.com/rampasek/GraphGPS
 
 ### Python environment setup with Conda
