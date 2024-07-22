@@ -4,7 +4,6 @@ from torch_geometric.data import Data
 from torch_geometric.utils import to_networkx, from_networkx, to_dense_adj
 import torch_geometric.transforms as T
 
-# import custom encodings
 from torchvision.transforms import Compose
 from experiments.graph_classification import Experiment
 
@@ -49,14 +48,6 @@ def log_to_file(message, filename="results/graph_classification.txt"):
     file = open(filename, "a")
     file.write(message)
     file.close()
-
-def _convert_lrgb(dataset: torch.Tensor) -> torch.Tensor:
-    x = dataset[0]
-    edge_attr = dataset[1]
-    edge_index = dataset[2]
-    y = dataset[3]
-
-    return Data(x = x, edge_index = edge_index, y = y, edge_attr = edge_attr)
 
 default_args = AttrDict({
     "dropout": 0.5,
@@ -106,143 +97,10 @@ for key in datasets:
     energies = []
     print(f"TESTING: {key} ({args.rewiring} - layer {args.layer_type})")
 
-    if key in ["peptides", "pascal", "coco"]:
-        dataset = [_convert_lrgb(datasets[key][i]) for i in range(len(datasets[key]))]
-
     else:
         dataset = datasets[key]
     
     
-    # encode the dataset using the given encoding, if args.encoding is not None
-    if args.encoding in ["LAPE", "RWPE", "LCP", "LDP", "SUB", "EGO"]:
-
-        if os.path.exists(f"data/{key}_{args.encoding}.pt"):
-            print('ENCODING ALREADY COMPLETED...')
-            dataset = torch.load(f"data/{key}_{args.encoding}.pt")
-
-        elif args.encoding == "LCP":
-            print('ENCODING STARTED...')
-            lcp = LocalCurvatureProfile()
-            for i in range(len(dataset)):
-                dataset[i] = lcp.compute_orc(dataset[i])
-                print(f"Graph {i} of {len(dataset)} encoded with {args.encoding}")
-            torch.save(dataset, f"data/{key}_{args.encoding}.pt")
-
-        else:
-            print('ENCODING STARTED...')
-            org_dataset_len = len(dataset)
-            drop_datasets = []
-            current_graph = 0
-
-            for i in range(org_dataset_len):
-                if args.encoding == "LAPE":
-                    num_nodes = dataset[i].num_nodes
-                    eigvecs = np.min([num_nodes, 8]) - 2
-                    transform = T.AddLaplacianEigenvectorPE(k=eigvecs)
-
-                elif args.encoding == "RWPE":
-                    transform = T.AddRandomWalkPE(walk_length=16)
-
-                elif args.encoding == "LDP":
-                    transform = T.LocalDegreeProfile()
-
-                elif args.encoding == "SUB":
-                    transform = T.RootedRWSubgraph(walk_length=10)
-
-                elif args.encoding == "EGO":
-                    transform = T.RootedEgoNets(num_hops=2)
-
-                try:
-                    dataset[i] = transform(dataset[i])
-                    print(f"Graph {current_graph} of {org_dataset_len} encoded with {args.encoding}")
-                    current_graph += 1
-
-                except:
-                    print(f"Graph {current_graph} of {org_dataset_len} dropped due to encoding error")
-                    drop_datasets.append(i)
-                    current_graph += 1
-
-            for i in sorted(drop_datasets, reverse=True):
-                dataset.pop(i)
-
-            # save the dataset to a file in the data folder
-            torch.save(dataset, f"data/{key}_{args.encoding}.pt")
-
-
-    print('REWIRING STARTED...')
-    start = time.time()
-    with tqdm.tqdm(total=len(dataset)) as pbar:
-        if args.rewiring == "fosr":
-            for i in range(len(dataset)):
-                edge_index, edge_type, _ = fosr.edge_rewire(dataset[i].edge_index.numpy(), num_iterations=args.num_iterations)
-                dataset[i].edge_index = torch.tensor(edge_index)
-                dataset[i].edge_type = torch.tensor(edge_type)
-                pbar.update(1)
-        elif args.rewiring == "sdrf_orc":
-            for i in range(len(dataset)):
-                dataset[i].edge_index, dataset[i].edge_type = sdrf.sdrf(dataset[i], loops=args.num_iterations, remove_edges=False, is_undirected=True, curvature='orc')
-                pbar.update(1)
-        elif args.rewiring == "sdrf_bfc":
-            for i in range(len(dataset)):
-                dataset[i].edge_index, dataset[i].edge_type = sdrf.sdrf(dataset[i], loops=args.num_iterations, remove_edges=args["sdrf_remove_edges"], 
-                        is_undirected=True, curvature='bfc')
-                pbar.update(1)
-        elif args.rewiring == "borf":
-            print(f"[INFO] BORF hyper-parameter : num_iterations = {args.num_iterations}")
-            print(f"[INFO] BORF hyper-parameter : batch_add = {args.borf_batch_add}")
-            print(f"[INFO] BORF hyper-parameter : batch_remove = {args.borf_batch_remove}")
-            for i in range(len(dataset)):
-                dataset[i].edge_index, dataset[i].edge_type = borf.borf3(dataset[i], 
-                        loops=args.num_iterations, 
-                        remove_edges=False, 
-                        is_undirected=True,
-                        batch_add=args.borf_batch_add,
-                        batch_remove=args.borf_batch_remove,
-                        dataset_name=key,
-                        graph_index=i)
-                pbar.update(1)
-        elif args.rewiring == "barf_3":
-            print(f"[INFO] BORF hyper-parameter : num_iterations = {args.num_iterations}")
-            print(f"[INFO] BORF hyper-parameter : batch_add = {args.borf_batch_add}")
-            print(f"[INFO] BORF hyper-parameter : batch_remove = {args.borf_batch_remove}")
-            for i in range(len(dataset)):
-                dataset[i].edge_index, dataset[i].edge_type = borf.borf4(dataset[i], 
-                        loops=args.num_iterations, 
-                        remove_edges=False, 
-                        is_undirected=True,
-                        batch_add=args.borf_batch_add,
-                        batch_remove=args.borf_batch_remove,
-                        dataset_name=key,
-                        graph_index=i)
-                pbar.update(1)
-        elif args.rewiring == "barf_4":
-            print(f"[INFO] BORF hyper-parameter : num_iterations = {args.num_iterations}")
-            print(f"[INFO] BORF hyper-parameter : batch_add = {args.borf_batch_add}")
-            print(f"[INFO] BORF hyper-parameter : batch_remove = {args.borf_batch_remove}")
-            for i in range(len(dataset)):
-                dataset[i].edge_index, dataset[i].edge_type = borf.borf5(dataset[i], 
-                        loops=args.num_iterations, 
-                        remove_edges=False, 
-                        is_undirected=True,
-                        batch_add=args.borf_batch_add,
-                        batch_remove=args.borf_batch_remove,
-                        dataset_name=key,
-                        graph_index=i)
-                pbar.update(1)
-        elif args.rewiring == "digl":
-            for i in range(len(dataset)):
-                dataset[i].edge_index = digl.rewire(dataset[i], alpha=0.1, eps=0.05)
-                m = dataset[i].edge_index.shape[1]
-                dataset[i].edge_type = torch.tensor(np.zeros(m, dtype=np.int64))
-                pbar.update(1)
-    end = time.time()
-    rewiring_duration = end - start
-
-    print('REWIRING COMPLETED...')
-
-
-    
-    #spectral_gap = average_spectral_gap(dataset)
     print('TRAINING STARTED...')
     start = time.time()
     for trial in range(args.num_trials):
