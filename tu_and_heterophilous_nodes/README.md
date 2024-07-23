@@ -1,7 +1,7 @@
-# Unitary GNNs and GCNNs
+# TU and Heterophilous Node Classification Datasets
 
 ## Requirements
-To configure and activate the conda environment for this repository, run
+To configure and activate the conda environment for this subdirectory, run
 ```
 conda env create -f environment.yml
 conda activate borf 
